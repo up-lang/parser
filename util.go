@@ -3,14 +3,7 @@ package parser
 import (
 	"io/ioutil"
 	"os"
-	"regexp"
 	"strings"
-)
-
-var (
-	LineEndingRegex = regexp.MustCompile("(?:\r?\n)+")
-	WhitespaceRegex = regexp.MustCompile("\t+|  +")
-	PadRegex        = regexp.MustCompile("[{}()\\[\\]<>]")
 )
 
 func readFile(path string) (string, error) {
@@ -31,15 +24,4 @@ func readFile(path string) (string, error) {
 	}
 
 	return sb.String(), nil
-}
-
-func collapseWhitespace(str string) string {
-	// get rid of line endings
-	str = LineEndingRegex.ReplaceAllString(str, " ")
-	// start collapsing whitespace
-	for WhitespaceRegex.MatchString(str) {
-		str = WhitespaceRegex.ReplaceAllString(str, " ")
-	}
-
-	return str
 }
