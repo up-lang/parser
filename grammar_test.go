@@ -77,4 +77,37 @@ func TestEnum(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	if rootNode.IsClass || !rootNode.IsEnum ||
+		rootNode.Name != "Pets" ||
+		rootNode.EnumOptions[0] != "Cats" ||
+		rootNode.EnumOptions[1] != "Dogs" ||
+		rootNode.EnumOptions[2] != "Fish" {
+		t.Fail()
+	}
+}
+
+func TestNamespace(t *testing.T) {
+	parser, err := participle.Build(&NamespaceDeclaration{})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	rootNode := &NamespaceDeclaration{}
+	err = parser.ParseString("", `namespace MyApp
+{
+	enum MyEnum {}
+	class MyClass {}
+}`, rootNode)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if rootNode.Name.NamespaceParts[0] != "MyApp" ||
+		rootNode.Members[0].Name != "MyEnum" ||
+		!rootNode.Members[0].IsEnum ||
+		rootNode.Members[1].Name != "MyClass" ||
+		!rootNode.Members[1].IsClass {
+		t.Fail()
+	}
 }

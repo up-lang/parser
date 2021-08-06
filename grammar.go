@@ -15,7 +15,7 @@ type Namespace struct {
 
 type NamespaceDeclaration struct {
 	Name    *Namespace         `"namespace" @@`
-	Members []*NamespaceMember `"{" @@ "}"`
+	Members []*NamespaceMember `"{" @@* "}"`
 }
 
 type NamespaceMember struct {
@@ -31,7 +31,7 @@ type ClassMember struct {
 	Name          string                 `@Ident`
 	Parameters    []*Parameter           `("(" (@@ ",")* @@? ")")?`
 	Type          *TypeName              `@@`
-	MethodBody    *Code                  `("{" @@ "}")?`
+	MethodBody    []*Statement           `("{" @@* "}")?`
 }
 
 type Parameter struct {
@@ -44,6 +44,7 @@ type TypeName struct {
 	Name      string     `@Ident`
 }
 
-type Code struct {
-	//TODO: help
+type ObjectName struct {
+	Type *TypeName `(@@ ".")?`
+	Name string    `@Ident`
 }
