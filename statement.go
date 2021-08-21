@@ -7,7 +7,7 @@ type LocalVarDefinition struct {
 }
 
 type Assignment struct {
-	Target        string      `@Ident "="`
+	Target        *ObjectName `@@ "="`
 	ValueToAssign *Expression `@@`
 }
 
@@ -17,10 +17,10 @@ type IfStatement struct {
 }
 
 type ForLoop struct {
-	VarCreation *LocalVarDefinition `"for" "(" @@ ";"`
-	Condition   *Expression         `@@ ";"`
-	Increment   *Statement          `@@ ")"`
-	Body        []*Statement        `"{" @@* "}"`
+	VarCreation *Statement   `"for" "(" @@ ";"`
+	Condition   *Expression  `@@ ";"`
+	Increment   *Statement   `@@ ")"`
+	Body        []*Statement `"{" @@* "}"`
 }
 
 type ForEachLoop struct {
