@@ -5,7 +5,8 @@ type Expression struct {
 }
 
 type ExpressionPart struct {
-	Literal      *Literal      `@@`
+	Null         bool          `@"null"`
+	Literal      *Literal      `|@@`
 	Call         *MethodCall   `|@@`
 	Construction *Construction `|@@`
 	Parenthesis  *Expression   `|"(" @@ ")"`
