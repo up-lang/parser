@@ -175,3 +175,44 @@ func testEq(a, b []string) bool {
 	}
 	return true
 }*/
+
+func TestLocalVarDeclaration(t *testing.T) {
+	parser, err := participle.Build(&LocalVarDefinition{})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	rootNode := &LocalVarDefinition{}
+	err = parser.ParseString("", `var myVar stdlib.String`, rootNode)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if rootNode.Name != "myVar" || rootNode.Type.Name != "String" || rootNode.Type.Array || rootNode.Type.Nullable ||
+		rootNode.Type.Namespace.NamespaceParts[0] != "stdlib" || rootNode.ValueToAssign != nil {
+		t.Fail()
+	}
+
+	rootNode = &LocalVarDefinition{}
+	err = parser.ParseString("", `var myVar ?stdlib.String = myOtherVar`, rootNode)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if rootNode.Name != "myVar" || rootNode.Type.Name != "String" || rootNode.Type.Array || !rootNode.Type.Nullable ||
+		rootNode.Type.Namespace.NamespaceParts[0] != "stdlib" || rootNode.ValueToAssign == nil ||
+		rootNode.ValueToAssign.Parts[0].ObjAccess == nil ||
+		rootNode.ValueToAssign.Parts[0].ObjAccess.Name != "myOtherVar" {
+		t.Fail()
+	}
+
+	rootNode = &LocalVarDefinition{}
+	err = parser.ParseString("", `var myVar []stdlib.String`, rootNode)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !rootNode.Type.Nullable {
+		t.Fail()
+	}
+}

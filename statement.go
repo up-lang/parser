@@ -3,8 +3,7 @@ package parser
 type LocalVarDefinition struct {
 	Name          string      `"var" @Ident`
 	Type          *TypeName   `@@`
-	IsAssignment  bool        `"="?`
-	ValueToAssign *Expression `@@`
+	ValueToAssign *Expression `("=" @@)?`
 }
 
 type Assignment struct {

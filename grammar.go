@@ -40,6 +40,8 @@ type Parameter struct {
 }
 
 type TypeName struct {
+	Nullable  bool       `@"?"?`
+	Array     bool       `@"[]"?`
 	Namespace *Namespace `(@@ ".")?`
 	Name      string     `@Ident`
 }
