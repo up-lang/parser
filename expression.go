@@ -5,7 +5,8 @@ type Expression struct {
 }
 
 type ExpressionPart struct {
-	Call        *MethodCall `@@`
+	Literal     *Literal    `@@`
+	Call        *MethodCall `|@@`
 	Parenthesis *Expression `|"(" @@ ")"`
 	Operator    *Operator   `|@("+" | "-" | "*" | "/" | "//" | "%" | "==" | "!=" | ">" | "<" | ">=" | "<=" | "!" | "&" | "&&" | "|" | "||" | "|||" | "===")`
 	ObjAccess   *ObjectName `|@@`

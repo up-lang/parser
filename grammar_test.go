@@ -176,6 +176,106 @@ func testEq(a, b []string) bool {
 	return true
 }*/
 
+func TestLiteral(t *testing.T) {
+	parser, err := participle.Build(&Expression{})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	rootNode := &Expression{}
+	err = parser.ParseString("", `true`, rootNode)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if *rootNode.Parts[0].Literal.Bit != true {
+		t.Fail()
+	}
+
+	rootNode = &Expression{}
+	err = parser.ParseString("", `5`, rootNode)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if rootNode.Parts[0].Literal.Int != 5 {
+		t.Fail()
+	}
+
+	rootNode = &Expression{}
+	err = parser.ParseString("", `5.6`, rootNode)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if rootNode.Parts[0].Literal.Float != 5.6 {
+		t.Fail()
+	}
+
+	rootNode = &Expression{}
+	err = parser.ParseString("", `0b1001001`, rootNode)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if rootNode.Parts[0].Literal.Int != 73 {
+		t.Fail()
+	}
+
+	rootNode = &Expression{}
+	err = parser.ParseString("", `0xFA8C`, rootNode)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if rootNode.Parts[0].Literal.Int != 64140 {
+		t.Fail()
+	}
+
+	rootNode = &Expression{}
+	err = parser.ParseString("", `'a'`, rootNode)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if *rootNode.Parts[0].Literal.Char != "a" {
+		t.Fail()
+	}
+
+	rootNode = &Expression{}
+	err = parser.ParseString("", `"hi"`, rootNode)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if *rootNode.Parts[0].Literal.String != "hi" {
+		t.Fail()
+	}
+
+	rootNode = &Expression{}
+	err = parser.ParseString("", `new [] String{}`, rootNode)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if rootNode.Parts[0].Literal.Array.Type.Name != "String" ||
+		len(rootNode.Parts[0].Literal.Array.Contents) != 0 {
+		t.Fail()
+	}
+
+	rootNode = &Expression{}
+	err = parser.ParseString("", `new [] String{"test", "test 2"}`, rootNode)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if rootNode.Parts[0].Literal.Array.Type.Name != "String" ||
+		*rootNode.Parts[0].Literal.Array.Contents[0].Parts[0].Literal.String != "test" ||
+		*rootNode.Parts[0].Literal.Array.Contents[1].Parts[0].Literal.String != "test 2" {
+		t.Fail()
+	}
+}
+
 func TestLocalVarDeclaration(t *testing.T) {
 	parser, err := participle.Build(&Statement{})
 	if err != nil {
