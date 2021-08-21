@@ -2,7 +2,7 @@ package parser
 
 type ArrayLiteral struct {
 	Type     *TypeName     `"new" "[""]" @@`
-	Contents []*Expression `"{" (@@ ",")* "}"`
+	Contents []*Expression `"{" ((@@ ",")* @@)? "}"`
 }
 
 type Literal struct {
@@ -10,6 +10,6 @@ type Literal struct {
 	Bit    *Bit          `|@("1" | "0" | "true" | "false")`
 	Float  float64       `|@Float`
 	Int    int           `|@Int`
-	Char   *string       `|"'" @Char "'"`
-	String *string       `|"\"" @String "\""`
+	Char   *string       `|@Char`
+	String *string       `|@String`
 }
