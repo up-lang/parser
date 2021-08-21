@@ -177,59 +177,61 @@ func testEq(a, b []string) bool {
 }*/
 
 func TestLocalVarDeclaration(t *testing.T) {
-	parser, err := participle.Build(&LocalVarDefinition{})
+	parser, err := participle.Build(&Statement{})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	rootNode := &LocalVarDefinition{}
-	err = parser.ParseString("", `var myVar stdlib.String`, rootNode)
+	rootNode := &Statement{}
+	err = parser.ParseString("", `var myVar stdlib.String;`, rootNode)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if rootNode.Name != "myVar" || rootNode.Type.Name != "String" || rootNode.Type.Array || rootNode.Type.Nullable ||
-		rootNode.Type.Namespace.NamespaceParts[0] != "stdlib" || rootNode.ValueToAssign != nil {
+	if rootNode.VarDef.Name != "myVar" || rootNode.VarDef.Type.Name != "String" || rootNode.VarDef.Type.Array ||
+		rootNode.VarDef.Type.Nullable || rootNode.VarDef.Type.Namespace.NamespaceParts[0] != "stdlib" ||
+		rootNode.VarDef.ValueToAssign != nil {
 		t.Fail()
 	}
 
-	rootNode = &LocalVarDefinition{}
-	err = parser.ParseString("", `var myVar ?stdlib.String = myOtherVar`, rootNode)
+	rootNode = &Statement{}
+	err = parser.ParseString("", `var myVar ?stdlib.String = myOtherVar;`, rootNode)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if rootNode.Name != "myVar" || rootNode.Type.Name != "String" || rootNode.Type.Array || !rootNode.Type.Nullable ||
-		rootNode.Type.Namespace.NamespaceParts[0] != "stdlib" || rootNode.ValueToAssign == nil ||
-		rootNode.ValueToAssign.Parts[0].ObjAccess == nil ||
-		rootNode.ValueToAssign.Parts[0].ObjAccess.Name != "myOtherVar" {
+	if rootNode.VarDef.Name != "myVar" || rootNode.VarDef.Type.Name != "String" || rootNode.VarDef.Type.Array ||
+		!rootNode.VarDef.Type.Nullable || rootNode.VarDef.Type.Namespace.NamespaceParts[0] != "stdlib" ||
+		rootNode.VarDef.ValueToAssign == nil || rootNode.VarDef.ValueToAssign.Parts[0].ObjAccess == nil ||
+		rootNode.VarDef.ValueToAssign.Parts[0].ObjAccess.Name != "myOtherVar" {
 		t.Fail()
 	}
 
-	rootNode = &LocalVarDefinition{}
-	err = parser.ParseString("", `var myVar []stdlib.String`, rootNode)
+	rootNode = &Statement{}
+	err = parser.ParseString("", `var myVar []stdlib.String;`, rootNode)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if !rootNode.Type.Array {
+	if !rootNode.VarDef.Type.Array {
 		t.Fail()
 	}
 }
 
 func TestAssignment(t *testing.T) {
-	parser, err := participle.Build(&Assignment{})
+	parser, err := participle.Build(&Statement{})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	rootNode := &Assignment{}
-	err = parser.ParseString("", `myVar = myOtherVar`, rootNode)
+	rootNode := &Statement{}
+	err = parser.ParseString("", `myVar = myOtherVar;`, rootNode)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if rootNode.Target != "myVar" || rootNode.ValueToAssign.Parts[0].ObjAccess.Name != "myOtherVar" {
+	if rootNode.Assignment.Target != "myVar" ||
+		rootNode.Assignment.ValueToAssign.Parts[0].ObjAccess.Name != "myOtherVar" {
 		t.Fail()
 	}
 }
