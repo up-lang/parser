@@ -19,17 +19,24 @@ type NamespaceDeclaration struct {
 }
 
 type NamespaceMember struct {
-	IsClass     bool           `@"class"?`
-	IsEnum      bool           `@"enum"?`
-	Name        string         `@Ident`
-	EnumOptions []string       `"{" (@Ident ";")* "}"`
-	Members     []*ClassMember `| "{" @@* "}"`
+	Class *Class `@@`
+	Enum  *Enum  `|@@`
+}
+
+type Enum struct {
+	Name    string   `"enum" @Ident`
+	Options []string `"{" (@Ident ";")* "}"`
+}
+
+type Class struct {
+	Name    string         `"class" @Ident`
+	Members []*ClassMember `"{" (@@ ";")* "}"`
 }
 
 type ClassMember struct {
 	Accessibility *AccessibilityModifier `@("public" | "private" | "operator")`
 	Name          string                 `@Ident`
-	Parameters    []*Parameter           `("(" (@@ ",")* @@? ")")?`
+	Parameters    []*Parameter           `("(" (@@ ","?)* ")")?`
 	Type          *TypeName              `@@`
 	MethodBody    []*Statement           `("{" @@* "}")?`
 }
@@ -40,10 +47,11 @@ type Parameter struct {
 }
 
 type TypeName struct {
-	Nullable  bool       `@"?"?`
+	IsVoid    bool       `@"void"`
+	Nullable  bool       `|(@"?"?`
 	Array     bool       `@("[""]")?`
 	Namespace *Namespace `(@@ ".")?`
-	Name      string     `@Ident`
+	Name      string     `@Ident)`
 }
 
 type ObjectName struct {

@@ -78,11 +78,10 @@ func TestEnum(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if rootNode.IsClass || !rootNode.IsEnum ||
-		rootNode.Name != "Pets" ||
-		rootNode.EnumOptions[0] != "Cats" ||
-		rootNode.EnumOptions[1] != "Dogs" ||
-		rootNode.EnumOptions[2] != "Fish" {
+	if rootNode.Enum.Name != "Pets" ||
+		rootNode.Enum.Options[0] != "Cats" ||
+		rootNode.Enum.Options[1] != "Dogs" ||
+		rootNode.Enum.Options[2] != "Fish" {
 		t.Fail()
 	}
 }
@@ -104,10 +103,8 @@ func TestNamespace(t *testing.T) {
 	}
 
 	if rootNode.Name.NamespaceParts[0] != "MyApp" ||
-		rootNode.Members[0].Name != "MyEnum" ||
-		!rootNode.Members[0].IsEnum ||
-		rootNode.Members[1].Name != "MyClass" ||
-		!rootNode.Members[1].IsClass {
+		rootNode.Members[0].Enum.Name != "MyEnum" ||
+		rootNode.Members[1].Class.Name != "MyClass" {
 		t.Fail()
 	}
 }
@@ -126,55 +123,6 @@ func TestExpression(t *testing.T) {
 
 	// please dont make me test this it works okay
 }
-
-/*func checkExpressionEq(exp1, exp2 *Expression) bool {
-	for i, part := range exp1.Parts {
-		expectedPart := exp2.Parts[i]
-		if part.ObjAccess != nil && !checkAccessEq(part.ObjAccess, expectedPart.ObjAccess) {
-			return false
-		}
-
-		if part.Call != nil {
-			if !checkAccessEq(part.Call.Name, expectedPart.ObjAccess) {
-				return false
-			}
-			for i2, subExp := range part.Call.Params {
-				expectedSubExp := expectedPart.Call.Params[i2]
-				if !checkExpressionEq(subExp, expectedSubExp) {
-					return false
-				}
-			}
-		}
-
-		if part.Operator != nil && *part.Operator != *expectedPart.Operator {
-			return false
-		}
-
-		if part.Parenthesis != nil && !checkExpressionEq(part.Parenthesis, expectedPart.Parenthesis) {
-			return false
-		}
-	}
-
-	return true
-}
-
-func checkAccessEq(item1, item2 *ObjectName) bool {
-	return item1.Name == item2.Name &&
-		item1.Type.Name != item2.Type.Name &&
-		testEq(item1.Type.Namespace.NamespaceParts, item2.Type.Namespace.NamespaceParts)
-}
-
-func testEq(a, b []string) bool {
-	if len(a) != len(b) {
-		return false
-	}
-	for i := range a {
-		if a[i] != b[i] {
-			return false
-		}
-	}
-	return true
-}*/
 
 func TestLiteral(t *testing.T) {
 	parser, err := participle.Build(&Expression{})
@@ -333,5 +281,34 @@ func TestAssignment(t *testing.T) {
 	if rootNode.Assignment.Target != "myVar" ||
 		rootNode.Assignment.ValueToAssign.Parts[0].ObjAccess.Name != "myOtherVar" {
 		t.Fail()
+	}
+}
+
+func TestMethod(t *testing.T) { // exciting!
+	parser, err := participle.Build(&ClassMember{})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	rootNode := &ClassMember{}
+	err = parser.ParseString("", `public MyEpicMethod() void {}`, rootNode)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// i really dont want to properly test this please no
+
+	rootNode = &ClassMember{}
+	err = parser.ParseString("", `public MyEpicMethod() String {}`, rootNode)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	rootNode = &ClassMember{}
+	err = parser.ParseString("", `public Invert(val1 Int32) Int32
+{
+	return -val1;
+}`, rootNode)
+	if err != nil {
+		t.Fatal(err)
 	}
 }

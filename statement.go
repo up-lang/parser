@@ -12,7 +12,8 @@ type Assignment struct {
 }
 
 type Statement struct {
-	VarDef     *LocalVarDefinition `@@ ";"`
+	Return     *Expression         `"return" @@ ";"`
+	VarDef     *LocalVarDefinition `|@@ ";"`
 	Assignment *Assignment         `|@@ ";"`
 	Method     *MethodCall         `|@@ ";"`
 }
