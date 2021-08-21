@@ -24,10 +24,10 @@ func Parse(rawCode string) (*Up, error) {
 		return nil, err
 	}
 
-	processed, err := postProcess(rootNode)
+	err = postProcess(rootNode)
 	if err != nil {
 		return nil, err
 	}
 
-	return processed, nil
+	return rootNode, nil
 }

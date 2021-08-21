@@ -4,256 +4,236 @@ import (
 	"errors"
 )
 
-func postProcess(parsed *Up) (*Up, error) {
+func postProcess(parsed *Up) error {
 	if parsed == nil {
-		return nil, errors.New("root node was nil")
+		return errors.New("root node was nil")
 	}
 
-	working := *parsed
-
-	if working.NamespaceDeclarations != nil {
-		for i, declaration := range working.NamespaceDeclarations {
-			decl, err := postProcessNamespaceDecl(declaration)
+	if parsed.NamespaceDeclarations != nil {
+		for _, declaration := range parsed.NamespaceDeclarations {
+			err := postProcessNamespaceDecl(declaration)
 			if err != nil {
-				return nil, err
+				return err
 			}
-			working.NamespaceDeclarations[i] = decl
 		}
 	}
 
-	return &working, nil
+	return nil
 }
 
-func postProcessNamespaceDecl(decl *NamespaceDeclaration) (*NamespaceDeclaration, error) {
+func postProcessNamespaceDecl(decl *NamespaceDeclaration) error {
 	if decl == nil {
-		return nil, errors.New("namespace declaration was nil")
+		return errors.New("namespace declaration was nil")
 	}
 
-	working := *decl
-
-	if working.Name == nil {
-		return nil, errors.New("namespace name was nil")
+	if decl.Name == nil {
+		return errors.New("namespace name was nil")
 	}
-	if len(working.Name.NamespaceParts) == 0 {
-		return nil, errors.New("namespace name was empty")
+	if len(decl.Name.NamespaceParts) == 0 {
+		return errors.New("namespace name was empty")
 	}
 
-	if working.Members != nil {
-		for i, member := range working.Members {
+	if decl.Members != nil {
+		for _, member := range decl.Members {
 			if member == nil || (member.Class == nil && member.Enum == nil) {
-				return nil, errors.New("member was nil")
+				return errors.New("member was nil")
 			}
 
 			if member.Class == nil { // must be enum
-				enum, err := postProcessEnum(member.Enum)
+				err := postProcessEnum(member.Enum)
 				if err != nil {
-					return nil, err
+					return err
 				}
-				working.Members[i].Enum = enum
 			} else { // must be class
-				class, err := postProcessClass(member.Class)
+				err := postProcessClass(member.Class)
 				if err != nil {
-					return nil, err
+					return err
 				}
-				working.Members[i].Class = class
 			}
 		}
 	}
 
-	return &working, nil
+	return nil
 }
 
-func postProcessEnum(enum *Enum) (*Enum, error) {
+func postProcessEnum(enum *Enum) error {
 	if enum == nil {
-		return nil, errors.New("enum was nil")
+		return errors.New("enum was nil")
 	}
 
-	working := *enum
-
-	if working.Name == "" {
-		return nil, errors.New("enum name was empty")
+	if enum.Name == "" {
+		return errors.New("enum name was empty")
 	}
-	for _, opt := range working.Options {
+	for _, opt := range enum.Options {
 		if opt == "" {
-			return nil, errors.New("enum option was empty")
+			return errors.New("enum option was empty")
 		}
 	}
 
-	return &working, nil
+	return nil
 }
 
-func postProcessClass(class *Class) (*Class, error) {
+func postProcessClass(class *Class) error {
 	if class == nil {
-		return nil, errors.New("class was nil")
+		return errors.New("class was nil")
 	}
 
-	working := *class
-
-	if working.Name == "" {
-		return nil, errors.New("class name was empty")
+	if class.Name == "" {
+		return errors.New("class name was empty")
 	}
 
-	for i, member := range working.Members {
+	for _, member := range class.Members {
 		if member.Name == "" {
-			return nil, errors.New("class member name was empty")
+			return errors.New("class member name was empty")
 		}
 
 		if member.Type == nil {
-			return nil, errors.New("class member type was nil")
+			return errors.New("class member type was nil")
 		}
 		if member.Type.Name == "" {
-			return nil, errors.New("class member type was empty")
+			return errors.New("class member type was empty")
 		}
 		if member.MethodBody == nil && member.Type.IsVoid {
-			return nil, errors.New("non-method class member had void as its type")
+			return errors.New("non-method class member had void as its type")
 		}
 
 		if member.MethodBody == nil && member.Parameters != nil {
-			return nil, errors.New("method \"" + member.Name + "\" was missing a body")
+			return errors.New("method \"" + member.Name + "\" was missing a body")
 		}
 
 		if member.Parameters != nil {
 			for _, param := range member.Parameters {
 				if param.Name == "" {
-					return nil, errors.New("method parameter had empty name")
+					return errors.New("method parameter had empty name")
 				}
 				if param.Type == nil {
-					return nil, errors.New("method parameter type was nil")
+					return errors.New("method parameter type was nil")
 				}
 				if param.Type.Name == "" {
-					return nil, errors.New("method parameter type was empty")
+					return errors.New("method parameter type was empty")
 				}
 				if param.Type.IsVoid {
-					return nil, errors.New("method parameter had void as its type")
+					return errors.New("method parameter had void as its type")
 				}
 			}
 		}
 
 		if member.MethodBody != nil {
-			for i2, statement := range member.MethodBody {
-				s, err := postProcessStatement(statement)
+			for _, statement := range member.MethodBody {
+				err := postProcessStatement(statement)
 				if err != nil {
-					return nil, err
+					return err
 				}
-				working.Members[i].MethodBody[i2] = s
 			}
 		}
 	}
 
-	return &working, nil
+	return nil
 }
 
-func postProcessExpression(expr *Expression) (*Expression, error) {
+func postProcessExpression(expr *Expression) error {
 	if expr == nil {
-		return nil, errors.New("expression was nil")
+		return errors.New("expression was nil")
 	}
 
-	working := *expr
-
-	if working.Parts == nil {
-		return nil, errors.New("expression was nil")
+	if expr.Parts == nil {
+		return errors.New("expression was nil")
 	}
 
-	for i, part := range working.Parts {
-		p, err := postProcessExpressionPart(part)
+	for _, part := range expr.Parts {
+		err := postProcessExpressionPart(part)
 		if err != nil {
-			return nil, err
+			return err
 		}
-		working.Parts[i] = p
 	}
 
-	return &working, nil
+	return nil
 }
 
-func postProcessExpressionPart(exprPart *ExpressionPart) (*ExpressionPart, error) {
+func postProcessExpressionPart(exprPart *ExpressionPart) error {
 	if exprPart == nil {
-		return nil, errors.New("expression part was nil")
+		return errors.New("expression part was nil")
 	}
 
-	working := *exprPart
-
-	if working.Literal == nil && working.ObjAccess == nil && working.Parenthesis == nil && working.Operator == nil &&
-		working.Call == nil || working.Construction == nil {
-		return nil, errors.New("expression part was nil")
+	if exprPart.Literal == nil && exprPart.ObjAccess == nil && exprPart.Parenthesis == nil && exprPart.Operator == nil &&
+		exprPart.Call == nil && exprPart.Construction == nil {
+		return errors.New("expression part was nil")
 	}
 
-	if working.Literal != nil {
-		if working.Literal.Array != nil {
-			if working.Literal.Array.Type == nil {
-				return nil, errors.New("array literal type was nil")
+	if exprPart.Literal != nil {
+		if exprPart.Literal.Array != nil {
+			if exprPart.Literal.Array.Type == nil {
+				return errors.New("array literal type was nil")
 			}
-			if working.Literal.Array.Type.Name == "" {
-				return nil, errors.New("array literal type was empty")
+			if exprPart.Literal.Array.Type.Name == "" {
+				return errors.New("array literal type was empty")
 			}
-			if working.Literal.Array.Type.IsVoid {
-				return nil, errors.New("array literal had void as its type")
+			if exprPart.Literal.Array.Type.IsVoid {
+				return errors.New("array literal had void as its type")
 			}
 		}
 
-		if working.Literal.String != nil {
-			trimmed := (*working.Literal.String)[1 : len(*working.Literal.String)-2]
-			working.Literal.String = &trimmed
+		if exprPart.Literal.String != nil {
+			trimmed := (*exprPart.Literal.String)[1 : len(*exprPart.Literal.String)-1]
+			exprPart.Literal.String = &trimmed
 		}
 
-		if working.Literal.Char != nil {
-			trimmed := (*working.Literal.String)[1:1]
-			working.Literal.Char = &trimmed
+		if exprPart.Literal.Char != nil {
+			trimmed := (*exprPart.Literal.Char)[1:2]
+			exprPart.Literal.Char = &trimmed
 		}
 
-	} else if working.Call != nil {
-		if working.Call.Name == nil {
-			return nil, errors.New("called method name was nil")
+	} else if exprPart.Call != nil {
+		if exprPart.Call.Name == nil {
+			return errors.New("called method name was nil")
 		}
-		if working.Call.Name.Name == "" {
-			return nil, errors.New("called method name was empty")
+		if exprPart.Call.Name.Name == "" {
+			return errors.New("called method name was empty")
 		}
 
-		if working.Call.Params != nil {
-			for i, param := range working.Call.Params {
-				expr, err := postProcessExpression(param)
+		if exprPart.Call.Params != nil {
+			for _, param := range exprPart.Call.Params {
+				err := postProcessExpression(param)
 				if err != nil {
-					return nil, err
+					return err
 				}
-				working.Call.Params[i] = expr
 			}
 		}
 
-	} else if working.Construction != nil {
-		if working.Construction.Type == nil {
-			return nil, errors.New("constructor call type was nil")
+	} else if exprPart.Construction != nil {
+		if exprPart.Construction.Type == nil {
+			return errors.New("constructor call type was nil")
 		}
-		if working.Construction.Type.Name == "" {
-			return nil, errors.New("constructor call type was empty")
+		if exprPart.Construction.Type.Name == "" {
+			return errors.New("constructor call type was empty")
 		}
-		if working.Construction.Type.IsVoid {
-			return nil, errors.New("constructor call had void as its type")
+		if exprPart.Construction.Type.IsVoid {
+			return errors.New("constructor call had void as its type")
 		}
 
-		if working.Construction.Params != nil {
-			for i, param := range working.Construction.Params {
-				expr, err := postProcessExpression(param)
+		if exprPart.Construction.Params != nil {
+			for _, param := range exprPart.Construction.Params {
+				err := postProcessExpression(param)
 				if err != nil {
-					return nil, err
+					return err
 				}
-				working.Construction.Params[i] = expr
 			}
 		}
 
-	} else if working.Parenthesis != nil {
+	} else if exprPart.Parenthesis != nil {
 		// recursion!
-		expr, err := postProcessExpression(working.Parenthesis)
+		err := postProcessExpression(exprPart.Parenthesis)
 		if err != nil {
-			return nil, err
+			return err
 		}
-		working.Parenthesis = expr
 
-	} else if working.Operator != nil {
+	} else if exprPart.Operator != nil {
 		// meh
-	} else if working.ObjAccess != nil {
-		if working.ObjAccess.Name == "" {
-			return nil, errors.New("accessed object name was empty")
+	} else if exprPart.ObjAccess != nil {
+		if exprPart.ObjAccess.Name == "" {
+			return errors.New("accessed object name was empty")
 		}
 	}
 
-	return &working, nil
+	return nil
 }
