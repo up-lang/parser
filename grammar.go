@@ -10,12 +10,14 @@ type WithDeclaration struct {
 }
 
 type Namespace struct {
-	NamespaceParts []string `(@Ident ":"?)*`
+	NamespaceParts []string `(@Ident ":")* @Ident`
 }
 
 type NamespaceDeclaration struct {
 	Name    *Namespace         `"namespace" @@`
-	Members []*NamespaceMember `"{" @@* "}"`
+	Members []*NamespaceMember `("{" @@* "}"`
+	Class   *Class             `|@@`
+	Enum    *Enum              `|@@)`
 }
 
 type NamespaceMember struct {
@@ -25,7 +27,7 @@ type NamespaceMember struct {
 
 type Enum struct {
 	Name    string   `"enum" @Ident`
-	Options []string `"{" (@Ident ";")* "}"`
+	Options []string `"{" ((@Ident ";")* @Ident)? "}"`
 }
 
 type Class struct {

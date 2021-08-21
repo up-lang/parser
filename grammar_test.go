@@ -72,7 +72,7 @@ func TestEnum(t *testing.T) {
 {
 	Cats;
 	Dogs;
-	Fish;
+	Fish
 }`, rootNode)
 	if err != nil {
 		t.Fatal(err)
@@ -310,5 +310,26 @@ func TestMethod(t *testing.T) { // exciting!
 }`, rootNode)
 	if err != nil {
 		t.Fatal(err)
+	}
+}
+
+func TestIntegratedClassEnum(t *testing.T) {
+	parser, err := participle.Build(&Up{})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	rootNode := &Up{}
+	err = parser.ParseString("", `namespace N1 class C {}
+namespace N2 enum E {}`, rootNode)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if rootNode.NamespaceDeclarations[0].Name.NamespaceParts[0] != "N1" ||
+		rootNode.NamespaceDeclarations[0].Class.Name != "C" ||
+		rootNode.NamespaceDeclarations[1].Name.NamespaceParts[0] != "N2" ||
+		rootNode.NamespaceDeclarations[1].Enum.Name != "E" {
+		t.Fail()
 	}
 }
