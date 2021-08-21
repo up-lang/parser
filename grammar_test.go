@@ -278,7 +278,7 @@ func TestAssignment(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if rootNode.Assignment.Target != "myVar" ||
+	if rootNode.Assignment.Target.Name != "myVar" ||
 		rootNode.Assignment.ValueToAssign.Parts[0].ObjAccess.Name != "myOtherVar" {
 		t.Fail()
 	}

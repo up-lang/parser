@@ -150,6 +150,18 @@ func postProcessExpression(expr *Expression) (*Expression, error) {
 
 	working := *expr
 
+	if working.Parts == nil {
+		return nil, errors.New("expression was nil")
+	}
+
+	for i, part := range working.Parts {
+		p, err := postProcessExpressionPart(part)
+		if err != nil {
+			return nil, err
+		}
+		working.Parts[i] = p
+	}
+
 	return &working, nil
 }
 
@@ -161,8 +173,86 @@ func postProcessExpressionPart(exprPart *ExpressionPart) (*ExpressionPart, error
 	working := *exprPart
 
 	if working.Literal == nil && working.ObjAccess == nil && working.Parenthesis == nil && working.Operator == nil &&
-		working.Call == nil {
+		working.Call == nil || working.Construction == nil {
 		return nil, errors.New("expression part was nil")
+	}
+
+	if working.Literal != nil {
+		if working.Literal.Array != nil {
+			if working.Literal.Array.Type == nil {
+				return nil, errors.New("array literal type was nil")
+			}
+			if working.Literal.Array.Type.Name == "" {
+				return nil, errors.New("array literal type was empty")
+			}
+			if working.Literal.Array.Type.IsVoid {
+				return nil, errors.New("array literal had void as its type")
+			}
+		}
+
+		if working.Literal.String != nil {
+			trimmed := (*working.Literal.String)[1 : len(*working.Literal.String)-2]
+			working.Literal.String = &trimmed
+		}
+
+		if working.Literal.Char != nil {
+			trimmed := (*working.Literal.String)[1:1]
+			working.Literal.Char = &trimmed
+		}
+
+	} else if working.Call != nil {
+		if working.Call.Name == nil {
+			return nil, errors.New("called method name was nil")
+		}
+		if working.Call.Name.Name == "" {
+			return nil, errors.New("called method name was empty")
+		}
+
+		if working.Call.Params != nil {
+			for i, param := range working.Call.Params {
+				expr, err := postProcessExpression(param)
+				if err != nil {
+					return nil, err
+				}
+				working.Call.Params[i] = expr
+			}
+		}
+
+	} else if working.Construction != nil {
+		if working.Construction.Type == nil {
+			return nil, errors.New("constructor call type was nil")
+		}
+		if working.Construction.Type.Name == "" {
+			return nil, errors.New("constructor call type was empty")
+		}
+		if working.Construction.Type.IsVoid {
+			return nil, errors.New("constructor call had void as its type")
+		}
+
+		if working.Construction.Params != nil {
+			for i, param := range working.Construction.Params {
+				expr, err := postProcessExpression(param)
+				if err != nil {
+					return nil, err
+				}
+				working.Construction.Params[i] = expr
+			}
+		}
+
+	} else if working.Parenthesis != nil {
+		// recursion!
+		expr, err := postProcessExpression(working.Parenthesis)
+		if err != nil {
+			return nil, err
+		}
+		working.Parenthesis = expr
+
+	} else if working.Operator != nil {
+		// meh
+	} else if working.ObjAccess != nil {
+		if working.ObjAccess.Name == "" {
+			return nil, errors.New("accessed object name was empty")
+		}
 	}
 
 	return &working, nil
