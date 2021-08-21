@@ -7,7 +7,7 @@ type LocalVarDefinition struct {
 }
 
 type Assignment struct {
-	Name          string      `@Ident "="`
+	Target        string      `@Ident "="`
 	ValueToAssign *Expression `@@`
 }
 

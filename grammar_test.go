@@ -216,3 +216,20 @@ func TestLocalVarDeclaration(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestAssignment(t *testing.T) {
+	parser, err := participle.Build(&Assignment{})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	rootNode := &Assignment{}
+	err = parser.ParseString("", `myVar = myOtherVar`, rootNode)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if rootNode.Target != "myVar" || rootNode.ValueToAssign.Parts[0].ObjAccess.Name != "myOtherVar" {
+		t.Fail()
+	}
+}
