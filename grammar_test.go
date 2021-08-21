@@ -238,7 +238,7 @@ func TestLiteral(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if *rootNode.Parts[0].Literal.Char != "a" {
+	if *rootNode.Parts[0].Literal.Char != "'a'" {
 		t.Fail()
 	}
 
@@ -248,7 +248,7 @@ func TestLiteral(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if *rootNode.Parts[0].Literal.String != "hi" {
+	if *rootNode.Parts[0].Literal.String != "\"hi\"" {
 		t.Fail()
 	}
 
@@ -270,8 +270,8 @@ func TestLiteral(t *testing.T) {
 	}
 
 	if rootNode.Parts[0].Literal.Array.Type.Name != "String" ||
-		*rootNode.Parts[0].Literal.Array.Contents[0].Parts[0].Literal.String != "test" ||
-		*rootNode.Parts[0].Literal.Array.Contents[1].Parts[0].Literal.String != "test 2" {
+		*rootNode.Parts[0].Literal.Array.Contents[0].Parts[0].Literal.String != "\"test\"" ||
+		*rootNode.Parts[0].Literal.Array.Contents[1].Parts[0].Literal.String != "\"test 2\"" {
 		t.Fail()
 	}
 }
