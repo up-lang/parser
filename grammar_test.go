@@ -116,7 +116,7 @@ func TestExpression(t *testing.T) {
 	}
 
 	rootNode := &Expression{}
-	err = parser.ParseString("", `var1 / (var2 + min(var3, var4))`, rootNode)
+	err = parser.ParseString("", `var1 / (var2 + Math.min(var3, var4))`, rootNode)
 	if err != nil {
 		t.Fatal(err)
 	}
