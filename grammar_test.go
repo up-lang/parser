@@ -212,7 +212,7 @@ func TestLocalVarDeclaration(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if !rootNode.Type.Nullable {
+	if !rootNode.Type.Array {
 		t.Fail()
 	}
 }
