@@ -5,18 +5,13 @@ type Expression struct {
 }
 
 type ExpressionPart struct {
-	ObjAccess *ObjectName    `@@`
-	Call      *MethodCall    `| @@`
-	OpChain   []*OperatorUse `| @@+`
-}
-
-type OperatorUse struct {
-	FirstObj  *ObjectName `@@`
-	Operator  *Operator   `@@?`
-	SecondObj *ObjectName `@@?`
+	Call        *MethodCall `@@`
+	Parenthesis *Expression `|"(" @@ ")"`
+	Operator    *Operator   `|@("+" | "-" | "*" | "/" | "//" | "%" | "==" | "!=" | ">" | "<" | ">=" | "<=" | "!" | "&" | "&&" | "|" | "||" | "|||" | "===")`
+	ObjAccess   *ObjectName `|@@`
 }
 
 type MethodCall struct {
 	Name   *ObjectName   `@@`
-	Params []*Expression `"(" (@@ ",")* ")"`
+	Params []*Expression `"(" (@@ ",")* @@ ")"`
 }

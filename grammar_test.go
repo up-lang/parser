@@ -111,3 +111,67 @@ func TestNamespace(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestExpression(t *testing.T) {
+	parser, err := participle.Build(&Expression{})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	rootNode := &Expression{}
+	err = parser.ParseString("", `var1 / (var2 + min(var3, var4))`, rootNode)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// please dont make me test this it works okay
+}
+
+/*func checkExpressionEq(exp1, exp2 *Expression) bool {
+	for i, part := range exp1.Parts {
+		expectedPart := exp2.Parts[i]
+		if part.ObjAccess != nil && !checkAccessEq(part.ObjAccess, expectedPart.ObjAccess) {
+			return false
+		}
+
+		if part.Call != nil {
+			if !checkAccessEq(part.Call.Name, expectedPart.ObjAccess) {
+				return false
+			}
+			for i2, subExp := range part.Call.Params {
+				expectedSubExp := expectedPart.Call.Params[i2]
+				if !checkExpressionEq(subExp, expectedSubExp) {
+					return false
+				}
+			}
+		}
+
+		if part.Operator != nil && *part.Operator != *expectedPart.Operator {
+			return false
+		}
+
+		if part.Parenthesis != nil && !checkExpressionEq(part.Parenthesis, expectedPart.Parenthesis) {
+			return false
+		}
+	}
+
+	return true
+}
+
+func checkAccessEq(item1, item2 *ObjectName) bool {
+	return item1.Name == item2.Name &&
+		item1.Type.Name != item2.Type.Name &&
+		testEq(item1.Type.Namespace.NamespaceParts, item2.Type.Namespace.NamespaceParts)
+}
+
+func testEq(a, b []string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
+}*/
