@@ -46,9 +46,24 @@ func RemoveComments(raw string) string {
 	sb := strings.Builder{}
 	for i := range lines {
 
+		inString := false
+		escapedThisChar := false
+
 		for i2 := range lines[i] {
 
-			if lines[i][i2] == '~' {
+			// manage if were in strings or not and deal with \"
+			if escapedThisChar {
+				escapedThisChar = false
+			} else {
+				if lines[i][i2] == '"' {
+					inString = !inString
+				}
+			}
+			if lines[i][i2] == '\\' {
+				escapedThisChar = true
+			}
+			// stop writing if its a legit line comment
+			if !inString && lines[i][i2] == '~' {
 				break
 			}
 
